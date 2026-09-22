@@ -1,375 +1,1474 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ESP32 Smart Environment Dashboard</title>
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+Smart Environment Dashboard
+</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
+/* =========================================================
+   ROOT
+========================================================= */
+
+:root{
+
+    --bg:#050816;
+    --bg2:#0b1224;
+
+    --card:rgba(15,23,42,.82);
+
+    --card2:#101b30;
+
+    --text:#f8fafc;
+    --muted:#94a3b8;
+
+    --border:rgba(255,255,255,.09);
+
+    --blue:#38bdf8;
+    --green:#4ade80;
+    --yellow:#facc15;
+    --red:#fb7185;
+    --purple:#a78bfa;
+    --orange:#fb923c;
+
+    --shadow:
+        0 20px 50px rgba(0,0,0,.30);
+
 }
+
+
+/* =========================================================
+   LIGHT THEME
+========================================================= */
+
+body.light{
+
+    --bg:#eef4fb;
+
+    --bg2:#f8fafc;
+
+    --card:rgba(255,255,255,.88);
+
+    --card2:#ffffff;
+
+    --text:#0f172a;
+
+    --muted:#64748b;
+
+    --border:rgba(15,23,42,.09);
+
+    --shadow:
+        0 15px 35px rgba(15,23,42,.10);
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*{
+
+    box-sizing:border-box;
+
+    margin:0;
+
+    padding:0;
+
+}
+
+
+html{
+
+    scroll-behavior:smooth;
+
+}
+
 
 body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:
-        radial-gradient(circle at 10% 0%,#172554 0%,transparent 30%),
-        radial-gradient(circle at 100% 100%,#064e3b 0%,transparent 30%),
-        #050816;
-    color:white;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color:var(--text);
+
     min-height:100vh;
+
+    overflow-x:hidden;
+
+    background:
+
+        radial-gradient(
+            circle at 5% 0%,
+            rgba(37,99,235,.28),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at 100% 100%,
+            rgba(16,185,129,.20),
+            transparent 30%
+        ),
+
+        var(--bg);
+
+    transition:
+        background .5s ease,
+        color .5s ease;
+
 }
+
+
+/* =========================================================
+   ANIMATED BACKGROUND
+========================================================= */
+
+.background-glow{
+
+    position:fixed;
+
+    width:350px;
+
+    height:350px;
+
+    border-radius:50%;
+
+    pointer-events:none;
+
+    filter:blur(100px);
+
+    opacity:.12;
+
+    z-index:-1;
+
+    animation:
+        floatingGlow 8s ease-in-out infinite;
+
+}
+
+
+.glow-one{
+
+    background:#2563eb;
+
+    left:-100px;
+
+    top:25%;
+
+}
+
+
+.glow-two{
+
+    background:#10b981;
+
+    right:-100px;
+
+    bottom:5%;
+
+    animation-delay:2s;
+
+}
+
+
+@keyframes floatingGlow{
+
+    0%,100%{
+
+        transform:
+            translate(0,0)
+            scale(1);
+
+    }
+
+    50%{
+
+        transform:
+            translate(30px,-25px)
+            scale(1.15);
+
+    }
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header{
-    padding:30px 5%;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:100;
+
+    padding:
+        22px
+        5%;
+
     display:flex;
+
     justify-content:space-between;
+
     align-items:center;
-    border-bottom:1px solid rgba(255,255,255,.08);
-    background:rgba(5,8,22,.8);
-    backdrop-filter:blur(15px);
+
+    gap:20px;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--bg) 82%,
+            transparent
+        );
+
+    backdrop-filter:blur(18px);
+
+    border-bottom:
+        1px solid var(--border);
+
 }
+
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+
+.logo-icon{
+
+    width:54px;
+
+    height:54px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    border-radius:16px;
+
+    font-size:28px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(59,130,246,.25),
+            rgba(16,185,129,.15)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    box-shadow:
+        0 0 25px
+        rgba(56,189,248,.15);
+
+}
+
 
 .logo h1{
-    font-size:32px;
+
+    font-size:28px;
+
+    letter-spacing:.3px;
+
 }
+
 
 .logo p{
-    margin-top:7px;
-    color:#94a3b8;
+
+    margin-top:5px;
+
+    color:var(--muted);
+
+    font-size:14px;
+
 }
+
+
+/* =========================================================
+   HEADER CONTROLS
+========================================================= */
+
+.header-controls{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+
+.theme-btn{
+
+    border:1px solid var(--border);
+
+    background:var(--card);
+
+    color:var(--text);
+
+    padding:
+        10px
+        15px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    transition:.3s;
+
+    backdrop-filter:blur(10px);
+
+}
+
+
+.theme-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,0,0,.15);
+
+}
+
 
 .live{
+
     display:flex;
+
     align-items:center;
-    gap:10px;
-    padding:11px 18px;
+
+    gap:9px;
+
+    padding:
+        10px
+        15px;
+
     border-radius:30px;
+
     color:#34d399;
-    background:rgba(16,185,129,.12);
-    border:1px solid rgba(16,185,129,.3);
+
+    background:
+        rgba(16,185,129,.10);
+
+    border:
+        1px solid
+        rgba(16,185,129,.25);
+
+    font-size:14px;
+
 }
+
 
 .live-dot{
-    width:10px;
-    height:10px;
+
+    width:9px;
+
+    height:9px;
+
     border-radius:50%;
+
     background:#22c55e;
-    box-shadow:0 0 15px #22c55e;
+
+    box-shadow:
+        0 0 15px
+        #22c55e;
+
+    animation:
+        livePulse 1.5s infinite;
+
 }
+
+
+@keyframes livePulse{
+
+    0%{
+
+        transform:scale(1);
+
+        opacity:1;
+
+    }
+
+    50%{
+
+        transform:scale(1.5);
+
+        opacity:.55;
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+        opacity:1;
+
+    }
+
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
 
 .container{
-    max-width:1450px;
-    margin:auto;
-    padding:35px 5%;
-}
 
-.alert{
-    margin-bottom:25px;
-    padding:20px 25px;
-    border-radius:20px;
-    background:linear-gradient(
-        100deg,
-        rgba(30,64,175,.4),
-        rgba(15,23,42,.8)
+    width:min(
+        1450px,
+        90%
     );
-    border:1px solid rgba(96,165,250,.2);
+
+    margin:auto;
+
+    padding:
+        35px
+        0
+        50px;
+
+}
+
+
+/* =========================================================
+   HERO STATUS
+========================================================= */
+
+.hero-status{
+
+    position:relative;
+
+    overflow:hidden;
+
     display:flex;
+
     justify-content:space-between;
+
     align-items:center;
-}
 
-.alert h2{
-    font-size:20px;
-}
+    gap:25px;
 
-.alert p{
-    color:#94a3b8;
-    margin-top:7px;
-}
+    padding:25px 30px;
 
-.check{
-    text-align:right;
-}
-
-.check small{
-    color:#cbd5e1;
-}
-
-.check strong{
-    display:block;
-    color:#4ade80;
-    font-size:25px;
-}
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:18px;
     margin-bottom:25px;
+
+    border-radius:22px;
+
+    background:
+
+        linear-gradient(
+            110deg,
+            rgba(30,64,175,.35),
+            rgba(15,23,42,.65)
+        );
+
+    border:
+        1px solid
+        rgba(96,165,250,.20);
+
+    box-shadow:var(--shadow);
+
 }
+
+
+body.light .hero-status{
+
+    background:
+
+        linear-gradient(
+            110deg,
+            rgba(219,234,254,.9),
+            rgba(255,255,255,.9)
+        );
+
+}
+
+
+.hero-status::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:180px;
+
+    height:180px;
+
+    right:-70px;
+
+    top:-90px;
+
+    border-radius:50%;
+
+    background:
+        rgba(56,189,248,.15);
+
+    filter:blur(30px);
+
+}
+
+
+.hero-title{
+
+    font-size:21px;
+
+    font-weight:bold;
+
+}
+
+
+.hero-message{
+
+    color:var(--muted);
+
+    margin-top:7px;
+
+    font-size:14px;
+
+}
+
+
+.room-check{
+
+    text-align:right;
+
+    min-width:130px;
+
+}
+
+
+.room-check small{
+
+    color:var(--muted);
+
+}
+
+
+.room-check strong{
+
+    display:block;
+
+    margin-top:4px;
+
+    font-size:27px;
+
+    color:var(--green);
+
+    text-shadow:
+        0 0 20px
+        rgba(74,222,128,.35);
+
+}
+
+
+/* =========================================================
+   SENSOR GRID
+========================================================= */
+
+.sensor-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:20px;
+
+    margin-bottom:25px;
+
+}
+
 
 .sensor{
+
     position:relative;
-    min-height:180px;
-    padding:24px;
-    border-radius:20px;
-    background:rgba(15,23,42,.85);
-    border:1px solid rgba(255,255,255,.08);
+
     overflow:hidden;
-    transition:.3s;
+
+    min-height:185px;
+
+    padding:24px;
+
+    border-radius:21px;
+
+    background:var(--card);
+
+    border:
+        1px solid
+        var(--border);
+
+    box-shadow:var(--shadow);
+
+    backdrop-filter:blur(15px);
+
+    transition:
+        transform .3s,
+        box-shadow .3s,
+        border .3s;
+
+    animation:
+        cardAppear .7s ease both;
+
 }
+
+
+.sensor:nth-child(2){
+
+    animation-delay:.08s;
+
+}
+
+
+.sensor:nth-child(3){
+
+    animation-delay:.16s;
+
+}
+
+
+.sensor:nth-child(4){
+
+    animation-delay:.24s;
+
+}
+
+
+.sensor:nth-child(5){
+
+    animation-delay:.32s;
+
+}
+
+
+.sensor:nth-child(6){
+
+    animation-delay:.40s;
+
+}
+
+
+@keyframes cardAppear{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateY(20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
 
 .sensor:hover{
-    transform:translateY(-4px);
-    box-shadow:0 15px 40px rgba(0,0,0,.3);
+
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        0 25px 55px
+        rgba(0,0,0,.28);
+
 }
 
-.sensor::after{
+
+.sensor::before{
+
     content:"";
+
     position:absolute;
-    width:100px;
-    height:100px;
-    right:-35px;
-    top:-35px;
+
+    width:130px;
+
+    height:130px;
+
+    right:-45px;
+
+    top:-45px;
+
     border-radius:50%;
-    background:var(--c);
-    opacity:.12;
-    filter:blur(10px);
+
+    background:var(--sensor-color);
+
+    opacity:.14;
+
+    filter:blur(12px);
+
+    transition:.4s;
+
 }
+
+
+.sensor:hover::before{
+
+    transform:scale(1.5);
+
+    opacity:.22;
+
+}
+
 
 .sensor-top{
+
     display:flex;
+
     justify-content:space-between;
+
+    align-items:center;
+
 }
 
-.icon{
-    font-size:25px;
-}
 
 .sensor-name{
-    color:#94a3b8;
+
+    color:var(--muted);
+
+    font-size:15px;
+
 }
 
-.value{
+
+.sensor-icon{
+
+    width:47px;
+
+    height:47px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:14px;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--sensor-color) 14%,
+            transparent
+        );
+
+    font-size:23px;
+
+}
+
+
+.sensor-value{
+
     margin-top:20px;
-    font-size:36px;
+
+    font-size:38px;
+
     font-weight:bold;
-    color:var(--c);
-    text-shadow:0 0 18px var(--g);
+
+    color:var(--sensor-color);
+
+    text-shadow:
+        0 0 20px
+        var(--sensor-glow);
+
 }
 
-.unit{
+
+.sensor-unit{
+
+    color:var(--muted);
+
     font-size:14px;
-    color:#94a3b8;
+
 }
+
 
 .badge{
+
     display:inline-block;
-    margin-top:15px;
-    padding:6px 10px;
+
+    margin-top:14px;
+
+    padding:
+        6px
+        10px;
+
     border-radius:8px;
-    background:rgba(255,255,255,.07);
-    color:#e2e8f0;
+
+    background:
+        rgba(255,255,255,.07);
+
+    color:var(--text);
+
     font-size:12px;
+
 }
+
+
+body.light .badge{
+
+    background:#e2e8f0;
+
+    color:#334155;
+
+}
+
+
+/* SENSOR COLORS */
 
 .temp{
-    --c:#fb7185;
-    --g:rgba(251,113,133,.6);
+
+    --sensor-color:#fb7185;
+
+    --sensor-glow:
+        rgba(251,113,133,.6);
+
 }
+
 
 .humi{
-    --c:#38bdf8;
-    --g:rgba(56,189,248,.6);
+
+    --sensor-color:#38bdf8;
+
+    --sensor-glow:
+        rgba(56,189,248,.6);
+
 }
+
 
 .light{
-    --c:#facc15;
-    --g:rgba(250,204,21,.6);
+
+    --sensor-color:#facc15;
+
+    --sensor-glow:
+        rgba(250,204,21,.6);
+
 }
+
 
 .pressure{
-    --c:#a78bfa;
-    --g:rgba(167,139,250,.6);
+
+    --sensor-color:#a78bfa;
+
+    --sensor-glow:
+        rgba(167,139,250,.6);
+
 }
+
 
 .gas{
-    --c:#fb923c;
-    --g:rgba(251,146,60,.6);
+
+    --sensor-color:#fb923c;
+
+    --sensor-glow:
+        rgba(251,146,60,.6);
+
 }
+
 
 .soil{
-    --c:#4ade80;
-    --g:rgba(74,222,128,.6);
+
+    --sensor-color:#4ade80;
+
+    --sensor-glow:
+        rgba(74,222,128,.6);
+
 }
 
-.grid{
+
+/* =========================================================
+   MAIN GRID
+========================================================= */
+
+.main-grid{
+
     display:grid;
-    grid-template-columns:2fr 1fr;
+
+    grid-template-columns:
+        2fr
+        1fr;
+
     gap:22px;
+
     margin-bottom:22px;
+
 }
+
 
 .panel{
-    background:rgba(15,23,42,.85);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:20px;
+
+    background:var(--card);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:22px;
+
     padding:25px;
+
+    box-shadow:var(--shadow);
+
+    backdrop-filter:blur(15px);
+
 }
 
-.panel h2{
-    margin-bottom:6px;
-}
 
-.panel p{
-    color:#64748b;
-    font-size:13px;
+.panel-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:10px;
+
     margin-bottom:20px;
+
 }
+
+
+.panel-title{
+
+    font-size:21px;
+
+    font-weight:bold;
+
+}
+
+
+.panel-subtitle{
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    margin-top:5px;
+
+}
+
 
 .chart-box{
+
+    position:relative;
+
     height:320px;
+
 }
+
+
+/* =========================================================
+   RECOMMENDATIONS
+========================================================= */
 
 .recommendation{
-    padding:17px;
+
+    padding:16px;
+
     margin-top:12px;
-    border-radius:13px;
-    background:#162238;
-    border-left:4px solid #38bdf8;
+
+    border-radius:14px;
+
+    background:
+        color-mix(
+            in srgb,
+            var(--card2) 85%,
+            transparent
+        );
+
+    border-left:
+        4px solid
+        var(--blue);
+
+    animation:
+        recommendationIn .5s ease;
+
 }
+
+
+@keyframes recommendationIn{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateX(10px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateX(0);
+
+    }
+
+}
+
 
 .recommendation strong{
+
     display:block;
+
     margin-bottom:7px;
+
 }
+
 
 .recommendation span{
-    color:#94a3b8;
+
+    color:var(--muted);
+
     font-size:13px;
+
+    line-height:1.5;
+
 }
 
-.info-grid{
+
+/* =========================================================
+   FIREBASE PANEL
+========================================================= */
+
+.firebase-grid{
+
     display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:14px;
+
 }
 
-.info{
+
+.info-box{
+
     padding:18px;
-    border-radius:14px;
-    background:#101b30;
+
+    border-radius:15px;
+
+    background:var(--card2);
+
+    border:
+        1px solid
+        var(--border);
+
 }
 
-.info small{
-    color:#64748b;
+
+.info-box small{
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.7px;
+
 }
 
-.info strong{
+
+.info-box strong{
+
     display:block;
-    margin-top:7px;
+
+    margin-top:8px;
+
+    font-size:15px;
+
 }
+
+
+/* =========================================================
+   NETWORK STATUS
+========================================================= */
+
+.network{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:18px;
+
+    margin-top:15px;
+
+    border-radius:15px;
+
+    background:var(--card2);
+
+    border:
+        1px solid
+        var(--border);
+
+}
+
+
+.network-icon{
+
+    width:45px;
+
+    height:45px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:21px;
+
+    background:
+        rgba(34,197,94,.12);
+
+}
+
+
+.network-info{
+
+    flex:1;
+
+}
+
+
+.network-info strong{
+
+    display:block;
+
+}
+
+
+.network-info span{
+
+    color:var(--muted);
+
+    font-size:12px;
+
+}
+
+
+/* =========================================================
+   LAST UPDATE
+========================================================= */
+
+.last-update{
+
+    margin-top:22px;
+
+}
+
+
+.last-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        2fr
+        1fr
+        1fr;
+
+    gap:15px;
+
+}
+
+
+.last-item{
+
+    padding:18px;
+
+    border-radius:15px;
+
+    background:var(--card2);
+
+    border:
+        1px solid
+        var(--border);
+
+}
+
+
+.last-item small{
+
+    color:var(--muted);
+
+}
+
+
+.last-item strong{
+
+    display:block;
+
+    margin-top:8px;
+
+    font-size:16px;
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
 
 .footer{
+
     text-align:center;
-    padding:30px;
-    color:#64748b;
+
+    color:var(--muted);
+
+    padding:
+        25px;
+
     font-size:13px;
+
 }
 
-@media(max-width:1000px){
 
-    .cards{
-        grid-template-columns:repeat(2,1fr);
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1050px){
+
+    .sensor-grid{
+
+        grid-template-columns:
+            repeat(2,1fr);
+
     }
 
-    .grid{
+    .main-grid{
+
         grid-template-columns:1fr;
+
     }
+
 }
 
-@media(max-width:600px){
 
-    .cards{
-        grid-template-columns:1fr;
-    }
+@media(max-width:700px){
 
     .header{
-        padding:25px;
+
+        padding:18px 5%;
+
+    }
+
+    .logo h1{
+
+        font-size:20px;
+
+    }
+
+    .logo-icon{
+
+        width:43px;
+
+        height:43px;
+
+        font-size:22px;
+
     }
 
     .live{
+
         display:none;
+
     }
 
-    .alert{
+    .sensor-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .hero-status{
+
         flex-direction:column;
+
         align-items:flex-start;
-        gap:15px;
+
     }
 
-    .check{
+    .room-check{
+
         text-align:left;
+
     }
+
+    .last-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .container{
+
+        width:92%;
+
+    }
+
 }
 
+
 </style>
+
 </head>
 
 
 <body>
 
 
+<!-- BACKGROUND -->
+
+<div class="background-glow glow-one"></div>
+
+<div class="background-glow glow-two"></div>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
 <header class="header">
+
 
 <div class="logo">
 
-<h1>🏠 Smart Environment Dashboard</h1>
+<div class="logo-icon">
 
-<p>ESP32 • Firebase Realtime IoT Monitoring</p>
+🏠
 
 </div>
+
+
+<div>
+
+<h1>
+Smart Environment Dashboard
+</h1>
+
+<p>
+ESP32 • Firebase Realtime IoT Monitoring
+</p>
+
+</div>
+
+</div>
+
+
+<div class="header-controls">
+
+
+<button
+    class="theme-btn"
+    id="themeButton"
+    onclick="toggleTheme()"
+>
+☀️ Light
+</button>
+
 
 <div class="live">
 
 <span class="live-dot"></span>
 
-<span id="liveText">LIVE</span>
+<span id="liveText">
+LIVE
+</span>
 
 </div>
 
+
+</div>
+
+
 </header>
 
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
 
 <main class="container">
 
 
 <!-- STATUS -->
 
-<div class="alert">
+<section class="hero-status">
+
 
 <div>
 
-<h2 id="environmentStatus">
-⚡ Environmental Monitoring
-</h2>
+<div
+    class="hero-title"
+    id="environmentStatus"
+>
+🌿 Environment is Normal
+</div>
 
-<p id="environmentMessage">
-กำลังวิเคราะห์ข้อมูลจาก ESP32...
-</p>
+
+<div
+    class="hero-message"
+    id="environmentMessage"
+>
+กำลังอ่านข้อมูลจาก ESP32...
+</div>
 
 </div>
 
-<div class="check">
 
-<small>Room Environment</small>
+<div class="room-check">
+
+<small>
+Room Environment
+</small>
 
 <strong id="roomStatus">
 CHECK
@@ -377,13 +1476,19 @@ CHECK
 
 </div>
 
-</div>
+
+</section>
 
 
-<!-- SENSOR CARDS -->
 
-<section class="cards">
+<!-- =========================================================
+     SENSOR CARDS
+========================================================= -->
 
+<section class="sensor-grid">
+
+
+<!-- TEMPERATURE -->
 
 <div class="sensor temp">
 
@@ -393,24 +1498,38 @@ CHECK
 🌡️ Temperature
 </div>
 
-<div class="icon">🌡️</div>
+<div class="sensor-icon">
+🌡️
+</div>
 
 </div>
 
-<div class="value">
 
-<span id="temp">--</span>
+<div class="sensor-value">
 
-<span class="unit">°C</span>
+<span id="temp">
+--
+</span>
+
+<span class="sensor-unit">
+°C
+</span>
 
 </div>
 
-<div class="badge" id="tempStatus">
+
+<div
+    class="badge"
+    id="tempStatus"
+>
 Checking...
 </div>
 
 </div>
 
+
+
+<!-- HUMIDITY -->
 
 <div class="sensor humi">
 
@@ -420,24 +1539,38 @@ Checking...
 💧 Humidity
 </div>
 
-<div class="icon">💧</div>
+<div class="sensor-icon">
+💧
+</div>
 
 </div>
 
-<div class="value">
 
-<span id="humi">--</span>
+<div class="sensor-value">
 
-<span class="unit">%</span>
+<span id="humi">
+--
+</span>
+
+<span class="sensor-unit">
+%
+</span>
 
 </div>
 
-<div class="badge" id="humiStatus">
+
+<div
+    class="badge"
+    id="humiStatus"
+>
 Checking...
 </div>
 
 </div>
 
+
+
+<!-- LIGHT -->
 
 <div class="sensor light">
 
@@ -447,24 +1580,38 @@ Checking...
 💡 Light
 </div>
 
-<div class="icon">💡</div>
+<div class="sensor-icon">
+💡
+</div>
 
 </div>
 
-<div class="value">
 
-<span id="light">--</span>
+<div class="sensor-value">
 
-<span class="unit">lux</span>
+<span id="light">
+--
+</span>
+
+<span class="sensor-unit">
+lux
+</span>
 
 </div>
 
-<div class="badge" id="lightStatus">
+
+<div
+    class="badge"
+    id="lightStatus"
+>
 Checking...
 </div>
 
 </div>
 
+
+
+<!-- PRESSURE -->
 
 <div class="sensor pressure">
 
@@ -474,17 +1621,25 @@ Checking...
 🌀 Pressure
 </div>
 
-<div class="icon">🌀</div>
+<div class="sensor-icon">
+🌀
+</div>
 
 </div>
 
-<div class="value">
 
-<span id="pressure">--</span>
+<div class="sensor-value">
 
-<span class="unit">hPa</span>
+<span id="pressure">
+--
+</span>
+
+<span class="sensor-unit">
+hPa
+</span>
 
 </div>
+
 
 <div class="badge">
 Atmospheric
@@ -492,6 +1647,9 @@ Atmospheric
 
 </div>
 
+
+
+<!-- GAS -->
 
 <div class="sensor gas">
 
@@ -501,24 +1659,38 @@ Atmospheric
 🫧 Gas Level
 </div>
 
-<div class="icon">🫧</div>
+<div class="sensor-icon">
+🫧
+</div>
 
 </div>
 
-<div class="value">
 
-<span id="gas">--</span>
+<div class="sensor-value">
 
-<span class="unit">ppm</span>
+<span id="gas">
+--
+</span>
+
+<span class="sensor-unit">
+ppm
+</span>
 
 </div>
 
-<div class="badge" id="gasStatus">
+
+<div
+    class="badge"
+    id="gasStatus"
+>
 Checking...
 </div>
 
 </div>
 
+
+
+<!-- SOIL -->
 
 <div class="sensor soil">
 
@@ -528,19 +1700,30 @@ Checking...
 🌱 Soil Moisture
 </div>
 
-<div class="icon">🌱</div>
+<div class="sensor-icon">
+🌱
+</div>
 
 </div>
 
-<div class="value">
 
-<span id="soil">--</span>
+<div class="sensor-value">
 
-<span class="unit">%</span>
+<span id="soil">
+--
+</span>
+
+<span class="sensor-unit">
+%
+</span>
 
 </div>
 
-<div class="badge" id="soilStatus">
+
+<div
+    class="badge"
+    id="soilStatus"
+>
 Checking...
 </div>
 
@@ -550,17 +1733,35 @@ Checking...
 </section>
 
 
-<!-- CHART 1 -->
 
-<div class="grid">
+<!-- =========================================================
+     CHART + RECOMMENDATION
+========================================================= -->
+
+<section class="main-grid">
+
+
+<!-- CHART -->
 
 <div class="panel">
 
-<h2>📊 Realtime Environment</h2>
 
-<p>
+<div class="panel-header">
+
+<div>
+
+<div class="panel-title">
+📊 Realtime Environment
+</div>
+
+<div class="panel-subtitle">
 Temperature and humidity from ESP32 history
-</p>
+</div>
+
+</div>
+
+</div>
+
 
 <div class="chart-box">
 
@@ -568,24 +1769,41 @@ Temperature and humidity from ESP32 history
 
 </div>
 
+
 </div>
 
 
-<!-- RECOMMENDATIONS -->
+
+<!-- RECOMMENDATION -->
 
 <div class="panel">
 
-<h2>✨ Smart Recommendations</h2>
 
-<p>
+<div class="panel-header">
+
+<div>
+
+<div class="panel-title">
+✨ Smart Recommendations
+</div>
+
+<div class="panel-subtitle">
 Automatic analysis from sensor data
-</p>
+</div>
+
+</div>
+
+</div>
+
 
 <div id="recommendations">
 
+
 <div class="recommendation">
 
-<strong>⏳ Loading...</strong>
+<strong>
+⏳ Loading...
+</strong>
 
 <span>
 กำลังอ่านข้อมูลจาก Firebase
@@ -593,24 +1811,45 @@ Automatic analysis from sensor data
 
 </div>
 
-</div>
 
 </div>
 
+
 </div>
 
 
-<!-- CHART 2 -->
+</section>
 
-<div class="grid">
+
+
+<!-- =========================================================
+     SECOND CHART + FIREBASE
+========================================================= -->
+
+<section class="main-grid">
+
+
+<!-- SECOND CHART -->
 
 <div class="panel">
 
-<h2>📈 Environmental Sensors</h2>
 
-<p>
+<div class="panel-header">
+
+<div>
+
+<div class="panel-title">
+📈 Environmental Sensors
+</div>
+
+<div class="panel-subtitle">
 Light, gas and soil moisture history
-</p>
+</div>
+
+</div>
+
+</div>
+
 
 <div class="chart-box">
 
@@ -618,46 +1857,80 @@ Light, gas and soil moisture history
 
 </div>
 
+
 </div>
 
+
+
+<!-- FIREBASE -->
 
 <div class="panel">
 
-<h2>🔥 Firebase Realtime Database</h2>
 
-<p>
-ข้อมูลจาก ESP32 ถูกส่งและจัดเก็บแบบ Real-time
-</p>
+<div class="panel-header">
 
-<div class="info-grid">
+<div>
 
-<div class="info">
+<div class="panel-title">
+🔥 Firebase Realtime Database
+</div>
 
-<small>DEVICE</small>
-
-<strong>ESP32-01</strong>
+<div class="panel-subtitle">
+ข้อมูลจาก ESP32 ถูกจัดเก็บแบบ Real-time
+</div>
 
 </div>
 
-<div class="info">
+</div>
 
-<small>DATABASE</small>
 
-<strong>Firebase RTDB</strong>
+<div class="firebase-grid">
+
+
+<div class="info-box">
+
+<small>
+Device
+</small>
+
+<strong>
+ESP32-01
+</strong>
 
 </div>
 
-<div class="info">
 
-<small>PATH</small>
+<div class="info-box">
 
-<strong>/lab/esp32-01</strong>
+<small>
+Database
+</small>
+
+<strong>
+Firebase RTDB
+</strong>
 
 </div>
 
-<div class="info">
 
-<small>STATUS</small>
+<div class="info-box">
+
+<small>
+Path
+</small>
+
+<strong>
+/lab/esp32-01
+</strong>
+
+</div>
+
+
+<div class="info-box">
+
+<small>
+Status
+</small>
 
 <strong id="firebaseStatus">
 Connected
@@ -665,6 +1938,65 @@ Connected
 
 </div>
 
+
+</div>
+
+
+<div class="network">
+
+<div class="network-icon">
+📡
+</div>
+
+
+<div class="network-info">
+
+<strong>
+ESP32 Connection
+</strong>
+
+<span>
+Realtime Firebase communication
+</span>
+
+</div>
+
+
+<div
+    id="networkStatus"
+    style="color:#4ade80"
+>
+● Online
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     LAST UPDATE
+========================================================= -->
+
+<section class="panel last-update">
+
+
+<div class="panel-header">
+
+<div>
+
+<div class="panel-title">
+🕐 System Information
+</div>
+
+<div class="panel-subtitle">
+Latest information received from ESP32
 </div>
 
 </div>
@@ -672,21 +2004,14 @@ Connected
 </div>
 
 
-<!-- LAST UPDATE -->
+<div class="last-grid">
 
-<div class="panel">
 
-<h2>🕐 Last Update</h2>
+<div class="last-item">
 
-<p>
-Latest data received from ESP32
-</p>
-
-<div class="info-grid">
-
-<div class="info">
-
-<small>LAST UPDATE</small>
+<small>
+LAST UPDATE
+</small>
 
 <strong id="lastUpdate">
 Waiting...
@@ -694,9 +2019,12 @@ Waiting...
 
 </div>
 
-<div class="info">
 
-<small>DATA POINTS</small>
+<div class="last-item">
+
+<small>
+DATA POINTS
+</small>
 
 <strong id="dataPoints">
 0
@@ -704,13 +2032,31 @@ Waiting...
 
 </div>
 
-</div>
+
+<div class="last-item">
+
+<small>
+UPDATE RATE
+</small>
+
+<strong>
+2 Seconds
+</strong>
 
 </div>
+
+
+</div>
+
+
+</section>
 
 
 </main>
 
+
+
+<!-- FOOTER -->
 
 <footer class="footer">
 
@@ -723,693 +2069,1259 @@ Smart Environment Monitoring System
 </footer>
 
 
+
 <script>
 
+
+/* =========================================================
+   FIREBASE
+========================================================= */
 
 const BASE =
 "https://iot-140-default-rtdb.asia-southeast1.firebasedatabase.app";
 
+
 const LATEST =
-BASE + "/lab/esp32-01/latest.json";
+BASE +
+"/lab/esp32-01/latest.json";
+
 
 const HISTORY =
-BASE + "/lab/esp32-01/history.json";
+BASE +
+"/lab/esp32-01/history.json";
 
 
-let environmentChart;
 
-let environmentChart2;
+/* =========================================================
+   THEME
+========================================================= */
+
+function toggleTheme(){
+
+    document.body.classList.toggle("light");
+
+    const light =
+        document.body.classList.contains("light");
 
 
-/* =========================
+    const button =
+        document.getElementById(
+            "themeButton"
+        );
+
+
+    if(light){
+
+        button.textContent =
+            "🌙 Dark";
+
+        localStorage.setItem(
+            "theme",
+            "light"
+        );
+
+    }
+
+    else{
+
+        button.textContent =
+            "☀️ Light";
+
+        localStorage.setItem(
+            "theme",
+            "dark"
+        );
+
+    }
+
+
+    updateChartsTheme();
+
+}
+
+
+/* LOAD THEME */
+
+const savedTheme =
+    localStorage.getItem("theme");
+
+
+if(savedTheme === "light"){
+
+    document.body.classList.add(
+        "light"
+    );
+
+    document.getElementById(
+        "themeButton"
+    ).textContent =
+        "🌙 Dark";
+
+}
+
+
+/* =========================================================
+   CHART COLORS
+========================================================= */
+
+function chartTextColor(){
+
+    return getComputedStyle(
+        document.body
+    ).getPropertyValue(
+        "--muted"
+    );
+
+}
+
+
+function chartGridColor(){
+
+    return document.body.classList.contains(
+        "light"
+    )
+
+    ? "rgba(15,23,42,.08)"
+
+    : "rgba(255,255,255,.06)";
+
+}
+
+
+/* =========================================================
    CHART 1
-========================= */
+========================================================= */
 
-const ctx =
-document.getElementById("environmentChart");
-
-environmentChart =
-new Chart(ctx,{
-
-type:"line",
-
-data:{
-
-labels:[],
-
-datasets:[
-
-{
-label:"Temperature °C",
-data:[],
-borderWidth:3,
-tension:.4,
-pointRadius:3
-},
-
-{
-label:"Humidity %",
-data:[],
-borderWidth:3,
-tension:.4,
-pointRadius:3
-}
-
-]
-
-},
-
-options:{
-
-responsive:true,
-
-maintainAspectRatio:false,
-
-interaction:{
-mode:"index",
-intersect:false
-},
-
-plugins:{
-legend:{
-labels:{
-color:"#cbd5e1"
-}
-}
-},
-
-scales:{
-
-x:{
-ticks:{
-color:"#64748b"
-},
-grid:{
-color:"rgba(255,255,255,.05)"
-}
-},
-
-y:{
-ticks:{
-color:"#64748b"
-},
-grid:{
-color:"rgba(255,255,255,.05)"
-}
-}
-
-}
-
-}
-
-});
+const chart1 =
+document.getElementById(
+    "environmentChart"
+);
 
 
-/* =========================
+const environmentChart =
+new Chart(
+    chart1,
+    {
+
+        type:"line",
+
+        data:{
+
+            labels:[],
+
+            datasets:[
+
+                {
+
+                    label:
+                        "Temperature °C",
+
+                    data:[],
+
+                    borderColor:
+                        "#38bdf8",
+
+                    backgroundColor:
+                        "rgba(56,189,248,.12)",
+
+                    borderWidth:3,
+
+                    tension:.42,
+
+                    pointRadius:3,
+
+                    pointHoverRadius:6,
+
+                    fill:true
+
+                },
+
+
+                {
+
+                    label:
+                        "Humidity %",
+
+                    data:[],
+
+                    borderColor:
+                        "#fb7185",
+
+                    backgroundColor:
+                        "rgba(251,113,133,.08)",
+
+                    borderWidth:3,
+
+                    tension:.42,
+
+                    pointRadius:3,
+
+                    pointHoverRadius:6,
+
+                    fill:true
+
+                }
+
+            ]
+
+        },
+
+
+        options:{
+
+            responsive:true,
+
+            maintainAspectRatio:false,
+
+            interaction:{
+
+                mode:"index",
+
+                intersect:false
+
+            },
+
+
+            plugins:{
+
+                legend:{
+
+                    labels:{
+
+                        color:
+                            chartTextColor(),
+
+                        usePointStyle:true
+
+                    }
+
+                }
+
+            },
+
+
+            scales:{
+
+                x:{
+
+                    ticks:{
+
+                        color:
+                            chartTextColor(),
+
+                        maxRotation:45
+
+                    },
+
+                    grid:{
+
+                        color:
+                            chartGridColor()
+
+                    }
+
+                },
+
+
+                y:{
+
+                    ticks:{
+
+                        color:
+                            chartTextColor()
+
+                    },
+
+                    grid:{
+
+                        color:
+                            chartGridColor()
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
    CHART 2
-========================= */
+========================================================= */
 
-const ctx2 =
-document.getElementById("environmentChart2");
+const chart2 =
+document.getElementById(
+    "environmentChart2"
+);
 
-environmentChart2 =
-new Chart(ctx2,{
 
-type:"line",
+const environmentChart2 =
+new Chart(
+    chart2,
+    {
 
-data:{
+        type:"line",
 
-labels:[],
+        data:{
 
-datasets:[
+            labels:[],
 
-{
-label:"Light lux",
-data:[],
-borderWidth:3,
-tension:.4
-},
+            datasets:[
 
-{
-label:"Gas ppm",
-data:[],
-borderWidth:3,
-tension:.4
-},
+                {
 
-{
-label:"Soil %",
-data:[],
-borderWidth:3,
-tension:.4
+                    label:
+                        "Light lux",
+
+                    data:[],
+
+                    borderColor:
+                        "#38bdf8",
+
+                    backgroundColor:
+                        "rgba(56,189,248,.08)",
+
+                    borderWidth:3,
+
+                    tension:.42,
+
+                    pointRadius:3,
+
+                    fill:true
+
+                },
+
+
+                {
+
+                    label:
+                        "Gas ppm",
+
+                    data:[],
+
+                    borderColor:
+                        "#fb7185",
+
+                    backgroundColor:
+                        "rgba(251,113,133,.08)",
+
+                    borderWidth:3,
+
+                    tension:.42,
+
+                    pointRadius:3,
+
+                    fill:true
+
+                },
+
+
+                {
+
+                    label:
+                        "Soil %",
+
+                    data:[],
+
+                    borderColor:
+                        "#fb923c",
+
+                    backgroundColor:
+                        "rgba(251,146,60,.08)",
+
+                    borderWidth:3,
+
+                    tension:.42,
+
+                    pointRadius:3,
+
+                    fill:true
+
+                }
+
+            ]
+
+        },
+
+
+        options:{
+
+            responsive:true,
+
+            maintainAspectRatio:false,
+
+            interaction:{
+
+                mode:"index",
+
+                intersect:false
+
+            },
+
+
+            plugins:{
+
+                legend:{
+
+                    labels:{
+
+                        color:
+                            chartTextColor(),
+
+                        usePointStyle:true
+
+                    }
+
+                }
+
+            },
+
+
+            scales:{
+
+                x:{
+
+                    ticks:{
+
+                        color:
+                            chartTextColor(),
+
+                        maxRotation:45
+
+                    },
+
+                    grid:{
+
+                        color:
+                            chartGridColor()
+
+                    }
+
+                },
+
+
+                y:{
+
+                    ticks:{
+
+                        color:
+                            chartTextColor()
+
+                    },
+
+                    grid:{
+
+                        color:
+                            chartGridColor()
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   UPDATE CHART THEME
+========================================================= */
+
+function updateChartsTheme(){
+
+    const text =
+        chartTextColor();
+
+    const grid =
+        chartGridColor();
+
+
+    [
+        environmentChart,
+        environmentChart2
+
+    ].forEach(chart => {
+
+        chart.options.plugins.legend.labels.color =
+            text;
+
+        chart.options.scales.x.ticks.color =
+            text;
+
+        chart.options.scales.y.ticks.color =
+            text;
+
+        chart.options.scales.x.grid.color =
+            grid;
+
+        chart.options.scales.y.grid.color =
+            grid;
+
+        chart.update();
+
+    });
+
 }
 
-]
-
-},
-
-options:{
-
-responsive:true,
-
-maintainAspectRatio:false,
-
-interaction:{
-mode:"index",
-intersect:false
-},
-
-plugins:{
-legend:{
-labels:{
-color:"#cbd5e1"
-}
-}
-},
-
-scales:{
-
-x:{
-ticks:{
-color:"#64748b"
-},
-grid:{
-color:"rgba(255,255,255,.05)"
-}
-},
-
-y:{
-ticks:{
-color:"#64748b"
-},
-grid:{
-color:"rgba(255,255,255,.05)"
-}
-}
-
-}
-
-}
-
-});
 
 
-/* =========================
-   LOAD DATA
-========================= */
+/* =========================================================
+   LOAD LATEST DATA
+========================================================= */
 
 async function loadData(){
 
-try{
+    try{
 
-const response =
-await fetch(
-LATEST + "?t=" + Date.now()
-);
-
-if(!response.ok)
-throw new Error("Firebase error");
-
-const data =
-await response.json();
-
-if(!data)
-throw new Error("No data");
+        const response =
+            await fetch(
+                LATEST +
+                "?t=" +
+                Date.now()
+            );
 
 
-const temp =
-Number(data.temp || 0);
+        if(!response.ok){
 
-const humi =
-Number(data.humi || 0);
+            throw new Error(
+                "Firebase connection failed"
+            );
 
-const light =
-Number(data.light || 0);
-
-const pressure =
-Number(data.pressure || 0);
-
-const gas =
-Number(data.gas || 0);
-
-const soil =
-Number(data.soil || 0);
+        }
 
 
-/* DISPLAY */
-
-document.getElementById("temp")
-.textContent =
-temp.toFixed(1);
-
-document.getElementById("humi")
-.textContent =
-humi.toFixed(1);
-
-document.getElementById("light")
-.textContent =
-light.toFixed(0);
-
-document.getElementById("pressure")
-.textContent =
-pressure.toFixed(1);
-
-document.getElementById("gas")
-.textContent =
-gas.toFixed(1);
-
-document.getElementById("soil")
-.textContent =
-soil.toFixed(1);
+        const data =
+            await response.json();
 
 
-/* STATUS */
+        if(!data){
 
-document.getElementById("tempStatus")
-.textContent =
-temp > 32
-? "⚠ Hot"
-: "✓ Normal";
+            throw new Error(
+                "No Firebase data"
+            );
 
-
-document.getElementById("humiStatus")
-.textContent =
-humi > 75
-? "⚠ High"
-: "✓ Normal";
+        }
 
 
-document.getElementById("lightStatus")
-.textContent =
-light < 200
-? "⚠ Low light"
-: "✓ Good";
+        const temp =
+            Number(
+                data.temp || 0
+            );
 
 
-document.getElementById("gasStatus")
-.textContent =
-gas > 400
-? "⚠ High"
-: "✓ Normal";
+        const humi =
+            Number(
+                data.humi || 0
+            );
 
 
-document.getElementById("soilStatus")
-.textContent =
-soil < 30
-? "⚠ Dry"
-: "✓ Moist";
+        const light =
+            Number(
+                data.light || 0
+            );
 
 
-/* MAIN STATUS */
-
-let warnings = 0;
-
-if(temp > 32) warnings++;
-
-if(humi > 75) warnings++;
-
-if(light < 200) warnings++;
-
-if(gas > 400) warnings++;
-
-if(soil < 30) warnings++;
+        const pressure =
+            Number(
+                data.pressure || 0
+            );
 
 
-if(warnings === 0){
+        const gas =
+            Number(
+                data.gas || 0
+            );
 
-document.getElementById(
-"environmentStatus"
-).textContent =
-"🌿 Environment is Normal";
 
-document.getElementById(
-"environmentMessage"
-).textContent =
-"สภาพแวดล้อมโดยรวมอยู่ในระดับปกติ";
+        const soil =
+            Number(
+                data.soil || 0
+            );
 
-document.getElementById(
-"roomStatus"
-).textContent =
-"GOOD";
 
-}else{
+        /* =================================================
+           DISPLAY
+        ================================================= */
 
-document.getElementById(
-"environmentStatus"
-).textContent =
-"⚠ มีบางค่าที่ควรตรวจสอบ";
 
-document.getElementById(
-"environmentMessage"
-).textContent =
-"ตรวจพบ " +
-warnings +
-" ปัจจัยที่ควรให้ความสนใจ";
+        document.getElementById(
+            "temp"
+        ).textContent =
+            temp.toFixed(1);
 
-document.getElementById(
-"roomStatus"
-).textContent =
-"CHECK";
+
+        document.getElementById(
+            "humi"
+        ).textContent =
+            humi.toFixed(1);
+
+
+        document.getElementById(
+            "light"
+        ).textContent =
+            light.toFixed(0);
+
+
+        document.getElementById(
+            "pressure"
+        ).textContent =
+            pressure.toFixed(1);
+
+
+        document.getElementById(
+            "gas"
+        ).textContent =
+            gas.toFixed(1);
+
+
+        document.getElementById(
+            "soil"
+        ).textContent =
+            soil.toFixed(1);
+
+
+
+        /* =================================================
+           SENSOR STATUS
+        ================================================= */
+
+
+        document.getElementById(
+            "tempStatus"
+        ).textContent =
+
+            temp >= 32
+
+            ? "⚠ Warm"
+
+            : "✓ Normal";
+
+
+
+        document.getElementById(
+            "humiStatus"
+        ).textContent =
+
+            humi >= 75
+
+            ? "⚠ High"
+
+            : "✓ Normal";
+
+
+
+        document.getElementById(
+            "lightStatus"
+        ).textContent =
+
+            light < 200
+
+            ? "⚠ Low light"
+
+            : "✓ Good";
+
+
+
+        document.getElementById(
+            "gasStatus"
+        ).textContent =
+
+            gas >= 400
+
+            ? "⚠ High"
+
+            : "✓ Normal";
+
+
+
+        document.getElementById(
+            "soilStatus"
+        ).textContent =
+
+            soil < 30
+
+            ? "⚠ Dry"
+
+            : "✓ Moist";
+
+
+
+        /* =================================================
+           ENVIRONMENT ANALYSIS
+        ================================================= */
+
+
+        let warnings = 0;
+
+
+        if(temp >= 32)
+            warnings++;
+
+
+        if(humi >= 75)
+            warnings++;
+
+
+        if(light < 200)
+            warnings++;
+
+
+        if(gas >= 400)
+            warnings++;
+
+
+        if(soil < 30)
+            warnings++;
+
+
+
+        if(warnings === 0){
+
+            document.getElementById(
+                "environmentStatus"
+            ).textContent =
+                "🌿 Environment is Normal";
+
+
+            document.getElementById(
+                "environmentMessage"
+            ).textContent =
+                "สภาพแวดล้อมโดยรวมอยู่ในระดับปกติ";
+
+
+            document.getElementById(
+                "roomStatus"
+            ).textContent =
+                "GOOD";
+
+        }
+
+        else{
+
+            document.getElementById(
+                "environmentStatus"
+            ).textContent =
+                "⚠ มีบางค่าที่ควรตรวจสอบ";
+
+
+            document.getElementById(
+                "environmentMessage"
+            ).textContent =
+                "ตรวจพบ " +
+                warnings +
+                " ปัจจัยที่ควรให้ความสนใจ";
+
+
+            document.getElementById(
+                "roomStatus"
+            ).textContent =
+                "CHECK";
+
+        }
+
+
+
+        /* =================================================
+           SMART RECOMMENDATIONS
+        ================================================= */
+
+
+        let recommendations = "";
+
+
+        if(gas >= 400){
+
+            recommendations += `
+
+            <div class="recommendation">
+
+                <strong>
+                    🫧 Gas Level สูง
+                </strong>
+
+                <span>
+                    ควรตรวจสอบคุณภาพอากาศ
+                    และเพิ่มการระบายอากาศ
+                </span>
+
+            </div>
+
+            `;
+
+        }
+
+
+        if(temp >= 32){
+
+            recommendations += `
+
+            <div class="recommendation">
+
+                <strong>
+                    🌡️ อุณหภูมิสูง
+                </strong>
+
+                <span>
+                    แนะนำให้เพิ่มการระบายอากาศ
+                    หรือปรับสภาพแวดล้อม
+                </span>
+
+            </div>
+
+            `;
+
+        }
+
+
+        if(humi >= 75){
+
+            recommendations += `
+
+            <div class="recommendation">
+
+                <strong>
+                    💧 ความชื้นสูง
+                </strong>
+
+                <span>
+                    ควรเพิ่มการระบายอากาศ
+                    เพื่อลดความชื้น
+                </span>
+
+            </div>
+
+            `;
+
+        }
+
+
+        if(light < 200){
+
+            recommendations += `
+
+            <div class="recommendation">
+
+                <strong>
+                    💡 แสงสว่างไม่เพียงพอ
+                </strong>
+
+                <span>
+                    แนะนำให้เพิ่มแสงสว่าง
+                    ในพื้นที่
+                </span>
+
+            </div>
+
+            `;
+
+        }
+
+
+        if(soil < 30){
+
+            recommendations += `
+
+            <div class="recommendation">
+
+                <strong>
+                    🌱 ดินค่อนข้างแห้ง
+                </strong>
+
+                <span>
+                    ควรตรวจสอบและเพิ่ม
+                    ความชื้นในดิน
+                </span>
+
+            </div>
+
+            `;
+
+        }
+
+
+        if(
+            recommendations === ""
+        ){
+
+            recommendations = `
+
+            <div class="recommendation">
+
+                <strong>
+                    ✨ Environment looks good
+                </strong>
+
+                <span>
+                    ค่าจากเซนเซอร์ทั้งหมด
+                    อยู่ในช่วงที่กำหนด
+                </span>
+
+            </div>
+
+            `;
+
+        }
+
+
+        document.getElementById(
+            "recommendations"
+        ).innerHTML =
+            recommendations;
+
+
+
+        /* =================================================
+           LAST UPDATE
+        ================================================= */
+
+
+        if(data.timestamp){
+
+            const date =
+                new Date(
+                    Number(
+                        data.timestamp
+                    ) * 1000
+                );
+
+
+            document.getElementById(
+                "lastUpdate"
+            ).textContent =
+                date.toLocaleString(
+                    "th-TH"
+                );
+
+        }
+
+        else{
+
+            document.getElementById(
+                "lastUpdate"
+            ).textContent =
+                new Date()
+                    .toLocaleString(
+                        "th-TH"
+                    );
+
+        }
+
+
+
+        /* =================================================
+           CONNECTION
+        ================================================= */
+
+
+        document.getElementById(
+            "liveText"
+        ).textContent =
+            "LIVE";
+
+
+        document.getElementById(
+            "firebaseStatus"
+        ).textContent =
+            "Connected";
+
+
+        document.getElementById(
+            "networkStatus"
+        ).innerHTML =
+            "● Online";
+
+
+    }
+
+
+    catch(error){
+
+        console.error(error);
+
+
+        document.getElementById(
+            "liveText"
+        ).textContent =
+            "OFFLINE";
+
+
+        document.getElementById(
+            "firebaseStatus"
+        ).textContent =
+            "Disconnected";
+
+
+        document.getElementById(
+            "networkStatus"
+        ).innerHTML =
+            "● Offline";
+
+    }
 
 }
 
 
-/* RECOMMENDATIONS */
 
-let recommendations = "";
-
-
-if(light < 200){
-
-recommendations += `
-
-<div class="recommendation">
-
-<strong>💡 แสงสว่างไม่เพียงพอ</strong>
-
-<span>
-แนะนำให้เพิ่มแสงสว่างในพื้นที่
-</span>
-
-</div>
-
-`;
-
-}
-
-
-if(temp > 32){
-
-recommendations += `
-
-<div class="recommendation">
-
-<strong>🌡️ อุณหภูมิสูง</strong>
-
-<span>
-แนะนำให้เพิ่มการระบายอากาศ
-</span>
-
-</div>
-
-`;
-
-}
-
-
-if(humi > 75){
-
-recommendations += `
-
-<div class="recommendation">
-
-<strong>💧 ความชื้นสูง</strong>
-
-<span>
-ควรเพิ่มการระบายอากาศ
-</span>
-
-</div>
-
-`;
-
-}
-
-
-if(soil < 30){
-
-recommendations += `
-
-<div class="recommendation">
-
-<strong>🌱 ดินค่อนข้างแห้ง</strong>
-
-<span>
-ควรตรวจสอบความชื้นของดิน
-</span>
-
-</div>
-
-`;
-
-}
-
-
-if(gas > 400){
-
-recommendations += `
-
-<div class="recommendation">
-
-<strong>🫧 Gas Level สูง</strong>
-
-<span>
-ควรตรวจสอบคุณภาพอากาศ
-</span>
-
-</div>
-
-`;
-
-}
-
-
-if(recommendations === ""){
-
-recommendations = `
-
-<div class="recommendation">
-
-<strong>✨ Environment looks good</strong>
-
-<span>
-ค่าจากเซนเซอร์ทั้งหมดอยู่ในช่วงที่กำหนด
-</span>
-
-</div>
-
-`;
-
-}
-
-
-document.getElementById(
-"recommendations"
-).innerHTML =
-recommendations;
-
-
-/* TIME */
-
-if(data.timestamp){
-
-const date =
-new Date(
-Number(data.timestamp) * 1000
-);
-
-document.getElementById(
-"lastUpdate"
-).textContent =
-date.toLocaleString("th-TH");
-
-}else{
-
-document.getElementById(
-"lastUpdate"
-).textContent =
-new Date().toLocaleString("th-TH");
-
-}
-
-
-/* LIVE */
-
-document.getElementById(
-"liveText"
-).textContent =
-"LIVE";
-
-document.getElementById(
-"firebaseStatus"
-).textContent =
-"Connected";
-
-
-}
-
-catch(error){
-
-console.error(error);
-
-document.getElementById(
-"liveText"
-).textContent =
-"OFFLINE";
-
-document.getElementById(
-"firebaseStatus"
-).textContent =
-"Disconnected";
-
-}
-
-}
-
-
-/* =========================
+/* =========================================================
    LOAD HISTORY
-========================= */
+========================================================= */
 
 async function loadHistory(){
 
-try{
+    try{
 
-const response =
-await fetch(
-HISTORY + "?t=" + Date.now()
-);
-
-const history =
-await response.json();
-
-if(!history)
-return;
+        const response =
+            await fetch(
+                HISTORY +
+                "?t=" +
+                Date.now()
+            );
 
 
-const rows =
-Object.values(history)
-.sort(
-(a,b) =>
-Number(a.timestamp || 0)
--
-Number(b.timestamp || 0)
-)
-.slice(-30);
+        if(!response.ok){
+
+            throw new Error(
+                "History request failed"
+            );
+
+        }
 
 
-const labels = [];
-
-const temps = [];
-
-const humis = [];
-
-const lights = [];
-
-const gases = [];
-
-const soils = [];
+        const history =
+            await response.json();
 
 
-rows.forEach(row => {
+        if(!history)
+            return;
 
-const date =
-new Date(
-Number(row.timestamp) * 1000
-);
 
-labels.push(
-date.toLocaleTimeString(
-"th-TH",
-{
-hour:"2-digit",
-minute:"2-digit",
-second:"2-digit"
+        const rows =
+            Object.values(history)
+
+            .filter(
+                item =>
+                    item &&
+                    item.timestamp
+            )
+
+            .sort(
+                (a,b) =>
+                    Number(
+                        a.timestamp
+                    )
+                    -
+                    Number(
+                        b.timestamp
+                    )
+            )
+
+            .slice(-30);
+
+
+
+        const labels = [];
+
+        const temps = [];
+
+        const humis = [];
+
+        const lights = [];
+
+        const gases = [];
+
+        const soils = [];
+
+
+
+        rows.forEach(row => {
+
+
+            const date =
+                new Date(
+                    Number(
+                        row.timestamp
+                    ) * 1000
+                );
+
+
+            labels.push(
+
+                date.toLocaleTimeString(
+                    "th-TH",
+                    {
+
+                        hour:"2-digit",
+
+                        minute:"2-digit",
+
+                        second:"2-digit"
+
+                    }
+                )
+
+            );
+
+
+            temps.push(
+                Number(
+                    row.temp || 0
+                )
+            );
+
+
+            humis.push(
+                Number(
+                    row.humi || 0
+                )
+            );
+
+
+            lights.push(
+                Number(
+                    row.light || 0
+                )
+            );
+
+
+            gases.push(
+                Number(
+                    row.gas || 0
+                )
+            );
+
+
+            soils.push(
+                Number(
+                    row.soil || 0
+                )
+            );
+
+        });
+
+
+
+        /* CHART 1 */
+
+        environmentChart
+            .data
+            .labels =
+            labels;
+
+
+        environmentChart
+            .data
+            .datasets[0]
+            .data =
+            temps;
+
+
+        environmentChart
+            .data
+            .datasets[1]
+            .data =
+            humis;
+
+
+        environmentChart.update(
+            "none"
+        );
+
+
+
+        /* CHART 2 */
+
+        environmentChart2
+            .data
+            .labels =
+            labels;
+
+
+        environmentChart2
+            .data
+            .datasets[0]
+            .data =
+            lights;
+
+
+        environmentChart2
+            .data
+            .datasets[1]
+            .data =
+            gases;
+
+
+        environmentChart2
+            .data
+            .datasets[2]
+            .data =
+            soils;
+
+
+        environmentChart2.update(
+            "none"
+        );
+
+
+
+        document.getElementById(
+            "dataPoints"
+        ).textContent =
+            rows.length;
+
+
+    }
+
+
+    catch(error){
+
+        console.error(
+            "History error:",
+            error
+        );
+
+    }
+
 }
-)
-);
-
-temps.push(
-Number(row.temp || 0)
-);
-
-humis.push(
-Number(row.humi || 0)
-);
-
-lights.push(
-Number(row.light || 0)
-);
-
-gases.push(
-Number(row.gas || 0)
-);
-
-soils.push(
-Number(row.soil || 0)
-);
-
-});
 
 
-environmentChart.data.labels =
-labels;
 
-environmentChart.data.datasets[0].data =
-temps;
-
-environmentChart.data.datasets[1].data =
-humis;
-
-environmentChart.update();
-
-
-environmentChart2.data.labels =
-labels;
-
-environmentChart2.data.datasets[0].data =
-lights;
-
-environmentChart2.data.datasets[1].data =
-gases;
-
-environmentChart2.data.datasets[2].data =
-soils;
-
-environmentChart2.update();
-
-
-document.getElementById(
-"dataPoints"
-).textContent =
-rows.length;
-
-
-}
-
-catch(error){
-
-console.error(
-"History error:",
-error
-);
-
-}
-
-}
-
-
-/* FIRST LOAD */
+/* =========================================================
+   START
+========================================================= */
 
 loadData();
 
 loadHistory();
 
 
-/* UPDATE */
+/* LATEST EVERY 2 SEC */
 
 setInterval(
-loadData,
-2000
+    loadData,
+    2000
 );
 
+
+/* HISTORY EVERY 5 SEC */
+
 setInterval(
-loadHistory,
-5000
+    loadHistory,
+    5000
 );
+
 
 </script>
 
 
 </body>
+
 </html>
